@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Expenses · SpendWise{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+    <div>
+        <p class="text-primary fw-semibold mb-1">TRANSACTIONS</p>
+        <h1 class="page-heading mb-1">All expenses</h1>
+        <p class="text-muted mb-0">Search your spending by month or category.</p>
+    </div>
+    <a href="{{ url_for('add_expense') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>
+        Add expense
+    </a>
+</div>
+<div class="card mb-4">
+    <div class="card-body">
+        <form class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label small fw-semibold">Month</label>
+                <input class="form-control" type="month" name="month" value="{{ selected_month }}">
+            </div>
+            <div class="col-md-5">
+                <label class="form-label small fw-semibold">Category</label>
+                <select name="category" class="form-select">
+                    <option value="">All categories</option>
+                    {% for c in categories %}
+                    <option value="{{ c.id }}" {% if selected_category==c.id|string %}selected{% endif %}>
+                        {{ c.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-outline-primary">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="card">
+    {% if expenses %}
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Expense</th>
+                    <th>Category</th>
+                    <th>Date</th>
+                    <th class="text-end">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in expenses %}
+                <tr>
+                    <td>
+                        <div class="fw-semibold">{{ e.title }}</div>
+                        {% if e.notes %}
+                        <small class="text-muted">{{ e.notes}}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge badge-category rounded-pill">
+                            <span class="category-dot me-1" data-color="{{ e.color }}"></span>\
+                            {{ e.category_name }}
+                        </span>
+                    </td>
+                    <td>{{ e.expense_date.strftime('%d %b %Y') }}</td>
+                    <td class="text-end fw-bold">{{ e.amount|inr }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-search fs-2 d-block mb-2"></i>
+        No expenses match these filters.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

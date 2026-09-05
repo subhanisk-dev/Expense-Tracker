@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Monthly Report · SpendWise{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+    <div>
+        <p class="text-primary fw-semibold mb-1">INSIGHTS</p>
+        <h1 class="page-heading mb-1">Monthly report</h1>
+        <p class="text-muted mb-0">A category-by-category breakdown of your spending.</p>
+    </div>
+    <form>
+        <input type="month" class="form-control" name="month" value="{{ selected_month }}"
+            onchange="this.form.submit()">
+    </form>
+</div>
+<div class="card mb-4">
+    <div class="card-body p-4 text-center">
+        <small class="text-muted text-uppercase fw-semibold">
+            Total spent in {{selected_month }}
+        </small>
+        <div class="report-total mt-1">{{ grand_total|inr }}</div>
+    </div>
+</div>
+<div class="card">
+    <div class="card-body p-4">
+        <h5 class="fw-bold mb-4">Spending by category</h5>
+        {% if grand_total %}
+        <div class="report-chart-wrap">
+            <canvas id="monthlyChart" data-rows='{{ rows | tojson | forceescape }}'></canvas>
+        </div>{% else %}
+        <div class="empty-state">
+            <i class="bi bi-bar-chart fs-2 d-block mb-2"></i>
+            No expenses recorded for this month.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
