@@ -9,7 +9,7 @@ from flask import Flask, flash, redirect, render_template, request, url_for
 load_dotenv()
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "change-this-secret-key")
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "subhani123")
 
 
 def get_db_connection():
