@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Add Budget · SpendWise{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <a href="{{ url_for('budgets') }}" class="text-decoration-none text-muted small">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to budgets
+        </a>
+        <div class="form-card mt-3">
+            <div class="card-body p-4 p-md-5">
+                <h1 class="page-heading h2 mb-1">Add budget</h1>
+                <p class="text-muted mb-4">Create an overall monthly budget or a category-specific limit.</p>
+                <form method="POST" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="budget_month" class="form-label">Budget month *</label>
+                        <input type="month" id="budget_month" name="budget_month" class="form-control" value="{{ request.form.get('budget_month', '') }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="amount" class="form-label">Budget amount (₹) *</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" id="amount" name="amount" class="form-control" min="0.01" step="0.01" value="{{ request.form.get('amount', '') }}" placeholder="0.00" required>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label for="category_id" class="form-label">Category</label>
+                        <select id="category_id" name="category_id" class="form-select">
+                            <option value="">Overall monthly budget</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {% if request.form.get('category_id') == category.id|string %}selected{% endif %}>{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Leave the category empty to create the overall monthly budget.</div>
+                    </div>
+                    <div class="col-12">
+                        <label for="notes" class="form-label">Notes <span class="text-muted fw-normal">(optional)</span></label>
+                        <textarea id="notes" name="notes" class="form-control" rows="4" maxlength="500" placeholder="e.g. Keep food spending below this amount.">{{ request.form.get('notes', '') }}</textarea>
+                    </div>
+                    <div class="col-12 d-flex flex-wrap gap-2 pt-2">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-check-lg me-1"></i>
+                            Save budget
+                        </button>
+                        <a href="{{ url_for('budgets') }}" class="btn btn-light">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

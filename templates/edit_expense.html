@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Edit Expense · SpendWise{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <a href="{{ url_for('expenses') }}" class="text-decoration-none text-muted small">
+            <i class="bi bi-arrow-left"></i>
+            Back to expenses
+        </a>
+        <div class="card mt-3">
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+                    <div>
+                        <h1 class="page-heading h2 mb-1">Edit expense</h1>
+                        <p class="text-muted mb-0">Update the transaction details.</p>
+                    </div>
+                    <span class="badge-soft">#{{ expense.id }}</span>
+                </div>
+                <form method="post" class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">What did you spend on? *</label>
+                        <input name="title" class="form-control" value="{{ request.form.get('title', expense.title) }}" required maxlength="120">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Amount (₹) *</label>
+                        <input name="amount" type="number" min="0.01" step="0.01" class="form-control" value="{{ request.form.get('amount', expense.amount) }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Category *</label>
+                        <select name="category_id" class="form-select" required>
+                            {% for c in categories %}
+                            <option value="{{ c.id }}" {% if request.form.get('category_id', expense.category_id|string) == c.id|string %}selected{% endif %}>{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Date *</label>
+                        <input name="expense_date" type="date" class="form-control" value="{{ request.form.get('expense_date', expense.expense_date.isoformat()) }}" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Notes <span class="text-muted fw-normal">(optional)</span></label>
+                        <textarea name="notes" class="form-control" rows="3" maxlength="500">{{ request.form.get('notes', expense.notes or '') }}</textarea>
+                    </div>
+                    <div class="col-12 d-flex flex-wrap gap-2 pt-2">
+                        <button class="btn btn-primary px-4" type="submit">
+                            <i class="bi bi-check-lg me-1"></i>
+                            Save changes
+                        </button>
+                        <a class="btn btn-light" href="{{ url_for('expenses') }}">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

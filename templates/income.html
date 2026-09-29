@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block title %}Income · SpendWise{% endblock %}
+{% block content %}
+<div class="income-page">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+        <div>
+            <p class="section-label mb-1">TRANSACTIONS</p>
+            <h1 class="page-heading mb-1">
+                <i class="bi bi-cash-stack me-2"></i>
+                Income
+            </h1>
+            <p class="text-muted mb-0">Search, filter and manage your income.</p>
+        </div>
+        <a href="{{ url_for('add_income') }}" class="btn btn-success">
+            <i class="bi bi-plus-lg me-1"></i>
+            Add Income
+        </a>
+    </div>
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <form method="GET" action="{{ url_for('income') }}">
+                <div class="row g-3">
+                    <div class="col-lg-3">
+                        <label for="search" class="form-label fw-semibold">Search</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" id="search" name="search" class="form-control" value="{{ search }}" placeholder="Source, notes or category">
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-2">
+                        <label for="category" class="form-label fw-semibold">Category</label>
+                        <select id="category" name="category" class="form-select">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {% if selected_category == category.id|string %}selected{% endif %}>{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 col-lg-2">
+                        <label for="year" class="form-label fw-semibold">Year</label>
+                        <select id="year" name="year" class="form-select">
+                            <option value="">All Years</option>
+                            {% for year in available_years %}
+                            <option value="{{ year.year }}" {% if selected_year == year.year|string %}selected{% endif %}>{{ year.year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 col-lg-2">
+                        <label for="month" class="form-label fw-semibold">Month</label>
+                        <select id="month" name="month" class="form-select">
+                            <option value="">All Months</option>
+                            {% for number, name in [
+                                (1, 'January'), (2, 'February'), (3, 'March'),
+                                (4, 'April'), (5, 'May'), (6, 'June'),
+                                (7, 'July'), (8, 'August'), (9, 'September'),
+                                (10, 'October'), (11, 'November'), (12, 'December')
+                            ] %}
+                            <option value="{{ number }}" {% if selected_month == number|string %}selected{% endif %}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 col-lg-2">
+                        <label for="start_date" class="form-label fw-semibold">From</label>
+                        <input type="date" id="start_date" name="start_date" class="form-control" value="{{ start_date }}">
+                    </div>
+                    <div class="col-md-6 col-lg-1">
+                        <label for="end_date" class="form-label fw-semibold">To</label>
+                        <input type="date" id="end_date" name="end_date" class="form-control" value="{{ end_date }}">
+                    </div>
+                    <div class="col-12 d-flex flex-wrap gap-2 pt-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-funnel me-1"></i>
+                            Filter
+                        </button>
+                        <a href="{{ url_for('income') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-1"></i>
+                            Clear
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-body px-4 py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small text-muted text-uppercase fw-semibold">Filtered income</div>
+                    <div class="fs-3 fw-bold text-success">{{ total|inr }}</div>
+                </div>
+                <span class="badge bg-light text-dark">
+                    {{ income_rows|length }}
+                    {% if income_rows|length == 1 %}entry{% else %}entries{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        {% if income_rows %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Income source</th>
+                        <th>Category</th>
+                        <th>Notes</th>
+                        <th class="text-end">Amount</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in income_rows %}
+                    <tr>
+                        <td>{{ item.income_date.strftime('%d %b %Y') }}</td>
+                        <td>
+                            <div class="fw-semibold">{{ item.title }}</div>
+                        </td>
+                        <td>
+                            <span class="badge badge-category rounded-pill">
+                                <span class="category-dot me-1" data-color="{{ item.color }}"></span>
+                                {{ item.category_name }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if item.notes %}
+                            <span class="text-muted">{{ item.notes }}</span>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end fw-bold text-success">+{{ item.amount|inr }}</td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-1">
+                                <a href="{{ url_for('edit_income', income_id=item.id) }}" class="btn btn-sm btn-outline-primary" title="Edit income">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="POST" action="{{ url_for('delete_income', income_id=item.id) }}" onsubmit="return confirm('Delete this income entry?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete income">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <!-- EMPTY STATE -->
+        <div class="empty-state text-center">
+            <i class="bi bi-cash-stack fs-1 d-block mb-3"></i>
+            <h5 class="fw-bold">No income found</h5>
+            <p>No income entries match your current filters.</p>
+            <a href="{{ url_for('add_income') }}" class="btn btn-success">
+                <i class="bi bi-plus-lg me-1"></i>
+                Add Income
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

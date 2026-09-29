@@ -1,135 +1,352 @@
 {% extends 'base.html' %}
+
 {% block title %}Dashboard · SpendWise{% endblock %}
+
 {% block content %}
+
 <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
     <div>
-        <p class="text-primary fw-semibold mb-1">OVERVIEW</p>
-        <h1 class="page-heading mb-1">Your spending dashboard</h1>
-        <p class="text-muted mb-0">A clear view of where your money is going.</p>
+        <p class="section-label mb-1">OVERVIEW</p>
+        <h1 class="page-heading mb-1">Your financial dashboard</h1>
+        <p class="text-muted mb-0">A clear view of your income, expenses and balance.</p>
     </div>
-    <a href="{{ url_for('add_expense') }}" class="btn btn-primary px-3">
-        <i class="bi bi-plus-lg me-1"></i>
-        Add expense
-    </a>
+
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('add_income') }}" class="btn btn-success px-3">
+            <i class="bi bi-plus-lg me-1"></i>
+            Add Income
+        </a>
+
+        <a href="{{ url_for('add_expense') }}" class="btn btn-primary px-3">
+            <i class="bi bi-plus-lg me-1"></i>
+            Add Expense
+        </a>
+    </div>
 </div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6 col-xl-4">
+        <div class="card stat-card h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon soft-green">
+                    <i class="bi bi-arrow-down-left"></i>
+                </div>
+
+                <div>
+                    <small class="text-muted d-block">This month's income</small>
+                    <div class="stat-value text-success">{{ month_income|inr }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-4">
+        <div class="card stat-card h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon soft-orange">
+                    <i class="bi bi-arrow-up-right"></i>
+                </div>
+
+                <div>
+                    <small class="text-muted d-block">This month's expenses</small>
+                    <div class="stat-value">{{ month_expenses|inr }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-4">
+        <div class="card stat-card h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon soft-indigo">
+                    <i class="bi bi-wallet2"></i>
+                </div>
+
+                <div>
+                    <small class="text-muted d-block">This month's balance</small>
+                    <div class="stat-value {% if month_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {{ month_balance|inr }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row g-3 mb-4">
     <div class="col-md-6 col-xl-3">
         <div class="card stat-card h-100">
             <div class="card-body d-flex align-items-center gap-3">
-                <div class="stat-icon soft-indigo"><i class="bi bi-calendar3"></i></div>
+                <div class="stat-icon soft-indigo">
+                    <i class="bi bi-calendar3"></i>
+                </div>
+
                 <div>
                     <small class="text-muted d-block">This month</small>
-                    <div class="stat-value">
-                        {{ stats.month_total|inr }}
-                    </div>
+                    <div class="stat-value">{{ stats.month_total|inr }}</div>
                 </div>
             </div>
         </div>
     </div>
+
     <div class="col-md-6 col-xl-3">
         <div class="card stat-card h-100">
             <div class="card-body d-flex align-items-center gap-3">
-                <div class="stat-icon soft-orange"><i class="bi bi-receipt"></i></div>
+                <div class="stat-icon soft-orange">
+                    <i class="bi bi-receipt"></i>
+                </div>
+
                 <div>
                     <small class="text-muted d-block">This month's entries</small>
-                    <div class="stat-value">
-                        {{ stats.month_count }}
-                    </div>
+                    <div class="stat-value">{{ stats.month_count }}</div>
                 </div>
             </div>
         </div>
     </div>
+
     <div class="col-md-6 col-xl-3">
         <div class="card stat-card h-100">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="stat-icon soft-green">
                     <i class="bi bi-wallet2"></i>
                 </div>
+
                 <div>
-                    <small class="text-muted d-block">All-time spend</small>
-                    <div class="stat-value">
-                        {{ total.total|inr }}
-                    </div>
+                    <small class="text-muted d-block">Total expenses</small>
+                    <div class="stat-value">{{ total.total|inr }}</div>
                 </div>
             </div>
         </div>
     </div>
+
     <div class="col-md-6 col-xl-3">
         <div class="card stat-card h-100">
             <div class="card-body d-flex align-items-center gap-3">
-                <div class="stat-icon soft-sky">
-                    <i class="bi bi-list-check"></i>
+                <div class="stat-icon soft-violet">
+                    <i class="bi bi-tags"></i>
                 </div>
+
                 <div>
-                    <small class="text-muted d-block">All entries</small>
-                    <div class="stat-value">
-                        {{ total.count }}
+                    <small class="text-muted d-block">Categories</small>
+                    <div class="stat-value">{{ category_data|length }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4 dashboard-action-cards">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                <div class="dashboard-action-content">
+                    <div class="stat-icon soft-green dashboard-action-icon">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+
+                    <div class="dashboard-action-details">
+                        <h5 class="fw-bold mb-1">Manage Income</h5>
+                        <p class="text-muted mb-3">Add salary, freelance income, bonuses and other earnings.</p>
+
+                        <a href="{{ url_for('income') }}" class="btn btn-outline-success">
+                            View Income
+                            <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                <div class="dashboard-action-content">
+                    <div class="stat-icon soft-orange dashboard-action-icon">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+
+                    <div class="dashboard-action-details">
+                        <h5 class="fw-bold mb-1">Manage Expenses</h5>
+                        <p class="text-muted mb-3">Search, filter and manage your spending transactions.</p>
+
+                        <a href="{{ url_for('expenses') }}" class="btn btn-outline-primary">
+                            View Expenses
+                            <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<div class="row g-4">
-    <div class="col-lg-5">
-        <div class="card h-100">
-            <div class="card-body p-4">
-                <h5 class="fw-bold mb-1">This month's categories</h5>
-                <p class="text-muted small mb-4">{{ current_month }}</p>
-                {% if category_data %}
-                <div class="chart-wrap">
-                    <canvas id="categoryChart"
-                        data-labels='{{ category_data | map(attribute="name") | list | tojson | forceescape }}'
-                        data-values='{{ category_data | map(attribute="total") | list | tojson | forceescape }}'
-                        data-colors='{{ category_data | map(attribute="color") | list | tojson | forceescape }}'></canvas>
-                </div>
-                {% else %}
-                <div class="empty-state">
-                    <i class="bi bi-bar-chart fs-2 d-block mb-2"></i>
-                    No spending recorded this month.
-                </div>
-                {% endif %}
-            </div>
+
+<div class="card mb-4">
+    <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-4 px-4">
+        <div>
+            <h5 class="fw-bold mb-1">Recent income</h5>
+            <p class="text-muted small mb-0">Your latest income transactions</p>
         </div>
+
+        <a href="{{ url_for('income') }}" class="btn btn-sm btn-outline-success">View all</a>
     </div>
-    <div class="col-lg-7">
-        <div class="card h-100">
-            <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-4 px-4">
-                <div>
-                    <h5 class="fw-bold mb-1">Recent expenses</h5>
-                    <p class="text-muted small mb-0">Your latest transactions</p>
+
+    {% if recent_income %}
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <tbody>
+                {% for item in recent_income %}
+                <tr>
+                    <td>
+                        <div class="fw-semibold">{{ item.title }}</div>
+                        <small class="text-muted">{{ item.income_date.strftime('%d %b %Y') }}</small>
+                    </td>
+
+                    <td>
+                        <span class="badge badge-category rounded-pill">
+                            <span class="category-dot me-1" data-color="{{ item.color }}"></span>
+                            {{ item.category_name }}
+                        </span>
+                    </td>
+
+                    <td class="text-end fw-bold text-success">+{{ item.amount|inr }}</td>
+
+                    <td class="text-end">
+                        <a href="{{ url_for('edit_income', income_id=item.id) }}" class="btn btn-sm btn-light" title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p class="mb-3">No income recorded yet.</p>
+
+        <a href="{{ url_for('add_income') }}" class="btn btn-success">
+            <i class="bi bi-plus-lg me-1"></i>
+            Add your first income
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-4 px-4">
+        <div>
+            <h5 class="fw-bold mb-1">Recent expenses</h5>
+            <p class="text-muted small mb-0">Your latest spending transactions</p>
+        </div>
+
+        <a href="{{ url_for('expenses') }}" class="btn btn-sm btn-outline-primary">View all</a>
+    </div>
+
+    {% if recent %}
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <tbody>
+                {% for expense in recent %}
+                <tr>
+                    <td>
+                        <div class="fw-semibold">{{ expense.title }}</div>
+                        <small class="text-muted">{{ expense.expense_date.strftime('%d %b %Y') }}</small>
+                    </td>
+
+                    <td>
+                        <span class="badge badge-category rounded-pill">
+                            <span class="category-dot me-1" data-color="{{ expense.color }}"></span>
+                            {{ expense.category_name }}
+                        </span>
+                    </td>
+
+                    <td class="text-end fw-bold">{{ expense.amount|inr }}</td>
+
+                    <td class="text-end">
+                        <a href="{{ url_for('edit_expense', expense_id=expense.id) }}" class="btn btn-sm btn-light" title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        No expenses yet.
+        <a href="{{ url_for('add_expense') }}" class="text-decoration-none">Add your first one!</a>
+    </div>
+    {% endif %}
+</div>
+
+{% if budget_warnings %}
+<div class="card budget-alert-card mb-4">
+    <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div>
+                <p class="section-label mb-1">BUDGET ALERTS</p>
+                <h2 class="h5 fw-bold mb-0">Spending needs attention</h2>
+            </div>
+
+            <a href="{{ url_for('budgets') }}" class="btn btn-sm btn-light">
+                <i class="bi bi-wallet2 me-1"></i>
+                View Budgets
+            </a>
+        </div>
+
+        <div class="budget-alert-list">
+            {% for alert in budget_warnings %}
+            <div class="budget-alert budget-alert-{{ alert.status }}">
+                <div class="budget-alert-icon">
+                    <i class="bi {{ alert.icon }}"></i>
                 </div>
-                <a href="{{ url_for('expenses') }}" class="btn btn-sm btn-outline-primary">View all</a>
+
+                <div class="budget-alert-content">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                        <div>
+                            <div class="budget-alert-title">{{ alert.title }}</div>
+
+                            <div class="budget-alert-category">
+                                <span class="category-dot" style="background: {{ alert.color }};"></span>
+                                {{ alert.category_name }}
+                            </div>
+                        </div>
+
+                        <div class="budget-alert-percentage">{{ alert.percentage|round(1) }}%</div>
+                    </div>
+
+                    <div class="budget-alert-message">{{ alert.message }}</div>
+
+                    <div class="budget-alert-progress">
+                        <div class="budget-alert-progress-bar" style="width: {{ [alert.percentage, 100]|min }}%;"></div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-2 small">
+                        <span class="text-muted">
+                            Spent:
+                            <strong>{{ alert.spent|inr }}</strong>
+                        </span>
+
+                        {% if alert.remaining >= 0 %}
+                        <span class="text-muted">
+                            Remaining:
+                            <strong>{{ alert.remaining|inr }}</strong>
+                        </span>
+                        {% else %}
+                        <span class="text-danger fw-bold">
+                            Over by:
+                            {{ alert.remaining|abs|inr }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-            {% if recent %}
-            <div class="table-responsive">
-                <table class="table mb-0">
-                    <tbody>
-                        {% for expense in recent %}
-                        <tr>
-                            <td>
-                                <div class="fw-semibold">{{ expense.title }}</div>
-                                <small class="text-muted">{{expense.expense_date.strftime('%d %b %Y') }}</small>
-                            </td>
-                            <td>
-                                <span class="badge badge-category rounded-pill">
-                                    <span class="category-dot me-1" data-color="{{ expense.color }}"></span>
-                                    {{ expense.category_name }}
-                                </span>
-                            </td>
-                            <td class="text-end fw-bold">{{ expense.amount|inr }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div class="empty-state">
-                <i class="bi bi-receipt-cutoff fs-2 d-block mb-2"></i>
-                No expenses yet. Add your first one!
-            </div>
-            {% endif %}
+            {% endfor %}
         </div>
     </div>
 </div>
+{% endif %}
+
 {% endblock %}

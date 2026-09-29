@@ -1,37 +1,489 @@
 {% extends 'base.html' %}
-{% block title %}Monthly Report · SpendWise{% endblock %}
+{% block title %}Financial Report · SpendWise{% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
     <div>
-        <p class="text-primary fw-semibold mb-1">INSIGHTS</p>
-        <h1 class="page-heading mb-1">Monthly report</h1>
-        <p class="text-muted mb-0">A category-by-category breakdown of your spending.</p>
+        <p class="section-label mb-1">INSIGHTS</p>
+        <h1 class="page-heading mb-1"><i class="bi bi-bar-chart-line me-2"></i>Financial Report</h1>
+        <p class="text-muted mb-0">Analyze your income and spending for any date range.</p>
     </div>
-    <form>
-        <input type="month" class="form-control" name="month" value="{{ selected_month }}"
-            onchange="this.form.submit()">
-    </form>
+    <div>
+        <a href="{{ url_for('monthly_report_pdf', range=selected_range, start_date=start_date, end_date=end_date) }}" class="btn btn-primary report-pdf-button">
+            <i class="bi bi-file-earmark-pdf me-1"></i>Download PDF
+        </a>
+    </div>
 </div>
 <div class="card mb-4">
-    <div class="card-body p-4 text-center">
-        <small class="text-muted text-uppercase fw-semibold">
-            Total spent in {{selected_month }}
-        </small>
-        <div class="report-total mt-1">{{ grand_total|inr }}</div>
+    <div class="card-body p-4">
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ url_for('monthly_report', range='7d') }}" class="btn {% if selected_range == '7d' %}btn-primary{% else %}btn-outline-secondary{% endif %}">7 Days</a>
+            <a href="{{ url_for('monthly_report', range='30d') }}" class="btn {% if selected_range == '30d' %}btn-primary{% else %}btn-outline-secondary{% endif %}">30 Days</a>
+            <a href="{{ url_for('monthly_report', range='this_month') }}" class="btn {% if selected_range == 'this_month' %}btn-primary{% else %}btn-outline-secondary{% endif %}">This Month</a>
+            <a href="{{ url_for('monthly_report', range='last_month') }}" class="btn {% if selected_range == 'last_month' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Last Month</a>
+            <a href="{{ url_for('monthly_report', range='6m') }}" class="btn {% if selected_range == '6m' %}btn-primary{% else %}btn-outline-secondary{% endif %}">6 Months</a>
+            <a href="{{ url_for('monthly_report', range='12m') }}" class="btn {% if selected_range == '12m' %}btn-primary{% else %}btn-outline-secondary{% endif %}">12 Months</a>
+        </div>
     </div>
 </div>
-<div class="card">
+<div class="card mb-4">
     <div class="card-body p-4">
-        <h5 class="fw-bold mb-4">Spending by category</h5>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+            <div>
+                <h5 class="fw-bold mb-1">Custom Date Range</h5>
+                <p class="text-muted mb-0">Choose your own start and end dates.</p>
+            </div>
+            <span class="badge-soft"><i class="bi bi-calendar3"></i>{{ report_label }}</span>
+        </div>
+        <form method="GET" action="{{ url_for('monthly_report') }}" class="row g-3 align-items-end">
+            <input type="hidden" name="range" value="custom">
+            <div class="col-md-4">
+                <label for="reportStartDate" class="form-label">From</label>
+                <input type="date" class="form-control" id="reportStartDate" name="start_date" value="{{ start_date }}" required>
+            </div>
+            <div class="col-md-4">
+                <label for="reportEndDate" class="form-label">To</label>
+                <input type="date" class="form-control" id="reportEndDate" name="end_date" value="{{ end_date }}" required>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel me-1"></i>Generate Report</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-md-6 col-xl-3">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                <small class="text-muted text-uppercase fw-semibold">Total income</small>
+                <div class="report-total mt-1">{{ total_income|inr }}</div>
+                <small class="text-muted">{{ income_count }} income transactions</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                <small class="text-muted text-uppercase fw-semibold">Total expenses</small>
+                <div class="report-total mt-1">{{ grand_total|inr }}</div>
+                <small class="text-muted">{{ expense_count }} expense transactions</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                <small class="text-muted text-uppercase fw-semibold">Net balance</small>
+                <div class="report-total mt-1">{{ net_balance|inr }}</div>
+                <small class="text-muted">Income minus expenses</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                <small class="text-muted text-uppercase fw-semibold">Savings rate</small>
+                <div class="report-total mt-1">{{ savings_rate|round(1) }}%</div>
+                <small class="text-muted">Based on total income</small>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card mb-4">
+    <div class="card-body px-4 py-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <small class="text-muted text-uppercase fw-semibold">Report period</small>
+                <div class="fw-bold mt-1">{{ report_label }}</div>
+            </div>
+            <div class="text-muted small">{{ start_date }} → {{ end_date }}</div>
+        </div>
+    </div>
+</div>
+<div class="card mb-4">
+    <div class="card-body p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+            <div>
+                <h5 class="fw-bold mb-1">Spending by category</h5>
+                <p class="text-muted mb-0">See where your money was spent during this period.</p>
+            </div>
+        </div>
         {% if grand_total %}
         <div class="report-chart-wrap">
-            <canvas id="monthlyChart" data-rows='{{ rows | tojson | forceescape }}'></canvas>
-        </div>{% else %}
+            <canvas id="monthlyChart" data-rows='{{ rows|tojson|forceescape }}'></canvas>
+        </div>
+        <div class="table-responsive mt-4">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Entries</th>
+                        <th class="text-end">Total</th>
+                        <th class="text-end">Share</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows if row.total|float > 0 %}
+                    <tr>
+                        <td>
+                            <span class="category-dot me-2 report-category-dot" data-color="{{ row.color }}"></span>
+                            {{ row.name }}
+                        </td>
+                        <td>{{ row.expense_count }}</td>
+                        <td class="text-end fw-bold">{{ row.total|inr }}</td>
+                        <td class="text-end">
+                            {% if grand_total %}
+                            {{ ((row.total|float / grand_total) * 100)|round(1) }}%
+                            {% else %}
+                            0%
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
         <div class="empty-state">
             <i class="bi bi-bar-chart fs-2 d-block mb-2"></i>
-            No expenses recorded for this month.
+            No expenses recorded for this period.
         </div>
         {% endif %}
     </div>
 </div>
+<div class="card mb-4">
+    <div class="card-body p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+            <div>
+                <h5 class="fw-bold mb-1"><i class="bi bi-wallet2 me-2"></i>Budget Performance</h5>
+                <p class="text-muted mb-0">Compare your budget with actual spending.</p>
+            </div>
+            <span class="badge-soft"><i class="bi bi-calendar-range"></i>{{ report_label }}</span>
+        </div>
+        {% if budget_performance %}
+        <div class="row g-3">
+            {% for budget in budget_performance %}
+            <div class="col-12 col-lg-6">
+                <div class="budget-performance-card">
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="category-dot report-budget-dot" data-color="{{ budget.category_color }}"></span>
+                            <div>
+                                <div class="fw-bold">{{ budget.category_name }}</div>
+                                <div class="small text-muted">{{ budget.budget_month }}</div>
+                            </div>
+                        </div>
+                        <span class="budget-performance-status {{ budget.status_class }}">{{ budget.status }}</span>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-4">
+                            <div class="small text-muted">Budget</div>
+                            <div class="fw-bold">{{ budget.budget_amount|inr }}</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="small text-muted">Spent</div>
+                            <div class="fw-bold">{{ budget.spent_amount|inr }}</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="small text-muted">Remaining</div>
+                            <div class="fw-bold {% if budget.remaining_amount < 0 %}text-danger{% endif %}">{{ budget.remaining_amount|inr }}</div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small text-muted">Budget used</span>
+                        <strong>{{ budget.usage_percentage|round(1) }}%</strong>
+                    </div>
+                    <div class="budget-performance-progress">
+                        <div class="budget-performance-progress-bar {{ budget.status_class }}" data-width="{{ budget.progress_percentage }}"></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-wallet2 fs-2 d-block mb-2"></i>
+            <div class="mb-3">No budgets found for this report period.</div>
+            <a href="{{ url_for('add_budget') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Budget</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<div class="card mb-4">
+    <div class="card-body p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+            <div>
+                <h5 class="fw-bold mb-1">Income vs Expenses</h5>
+                <p class="text-muted mb-0">Track how income and expenses changed during the selected period.</p>
+            </div>
+            <span class="badge-soft"><i class="bi bi-graph-up"></i>{{ report_label }}</span>
+        </div>
+        <div class="report-trend-chart-wrap">
+            <canvas id="reportTrendChart" data-rows='{{ trend_data|tojson|forceescape }}'></canvas>
+        </div>
+    </div>
+</div>
+<div class="card mb-4">
+    <div class="card-body p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+            <div>
+                <h5 class="fw-bold mb-1">Financial summary</h5>
+                <p class="text-muted mb-0">Income, expenses and balance for the selected period.</p>
+            </div>
+            <span class="badge-soft"><i class="bi bi-calendar-range"></i>{{ report_label }}</span>
+        </div>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="analytics-top-category">
+                    <div>
+                        <div class="small text-muted">Income</div>
+                        <div class="fw-bold fs-5">{{ total_income|inr }}</div>
+                    </div>
+                    <div class="analytics-icon analytics-icon-green"><i class="bi bi-arrow-down-left"></i></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="analytics-top-category">
+                    <div>
+                        <div class="small text-muted">Expenses</div>
+                        <div class="fw-bold fs-5">{{ grand_total|inr }}</div>
+                    </div>
+                    <div class="analytics-icon analytics-icon-coral"><i class="bi bi-arrow-up-right"></i></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="analytics-top-category">
+                    <div>
+                        <div class="small text-muted">Net balance</div>
+                        <div class="fw-bold fs-5">{{ net_balance|inr }}</div>
+                    </div>
+                    <div class="analytics-icon analytics-icon-teal"><i class="bi bi-wallet2"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".report-category-dot").forEach(function (dot) {
+        const color = dot.dataset.color;
+        if (color) {
+            dot.style.backgroundColor = color;
+        }
+    });
+    document.querySelectorAll(".report-budget-dot").forEach(function (dot) {
+        const color = dot.dataset.color;
+        if (color) {
+            dot.style.backgroundColor = color;
+        }
+    });
+    document.querySelectorAll(".budget-performance-progress-bar").forEach(function (bar) {
+        const width = Number(bar.dataset.width || 0);
+        bar.style.width = Math.min(Math.max(width, 0), 100) + "%";
+    });
+    const startDate = document.getElementById("reportStartDate");
+    const endDate = document.getElementById("reportEndDate");
+    if (startDate && endDate) {
+        function validateDates() {
+            if (startDate.value && endDate.value) {
+                if (startDate.value > endDate.value) {
+                    endDate.setCustomValidity("End date must be on or after the start date.");
+                } else {
+                    endDate.setCustomValidity("");
+                }
+            }
+        }
+        startDate.addEventListener("change", validateDates);
+        endDate.addEventListener("change", validateDates);
+    }
+    const trendCanvas = document.getElementById("reportTrendChart");
+    if (trendCanvas && typeof Chart !== "undefined") {
+        let trendRows = [];
+        try {
+            trendRows = JSON.parse(trendCanvas.dataset.rows || "[]");
+        } catch (error) {
+            console.error("Unable to parse trend data:", error);
+            trendRows = [];
+        }
+        const labels = trendRows.map(function (row) {
+            return row.label;
+        });
+        const incomeData = trendRows.map(function (row) {
+            return Number(row.income || 0);
+        });
+        const expenseData = trendRows.map(function (row) {
+            return Number(row.expense || 0);
+        });
+        new Chart(trendCanvas, {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: "Income",
+                        data: incomeData,
+                        borderColor: "#43a66f",
+                        backgroundColor: "rgba(67, 166, 111, 0.10)",
+                        borderWidth: 3,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        tension: 0.35,
+                        fill: false
+                    },
+                    {
+                        label: "Expenses",
+                        data: expenseData,
+                        borderColor: "#e96a4a",
+                        backgroundColor: "rgba(233, 106, 74, 0.10)",
+                        borderWidth: 3,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        tension: 0.35,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: "index"
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: "top",
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const value = Number(context.raw || 0);
+                                return context.dataset.label + ": ₹" + value.toLocaleString("en-IN", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                });
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return "₹" + Number(value).toLocaleString("en-IN");
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+<style>
+.report-pdf-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+.report-trend-chart-wrap {
+    position: relative;
+    width: 100%;
+    height: 360px;
+}
+@media (max-width: 767.98px) {
+    .report-trend-chart-wrap {
+        height: 300px;
+    }
+}
+.budget-performance-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 18px;
+    height: 100%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.budget-performance-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(23, 49, 59, 0.07);
+}
+.report-budget-dot {
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.budget-performance-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.budget-performance-status.success {
+    background: rgba(67, 166, 111, 0.12);
+    color: var(--green);
+}
+.budget-performance-status.warning {
+    background: rgba(237, 179, 62, 0.16);
+    color: #9a6900;
+}
+.budget-performance-status.danger {
+    background: rgba(220, 93, 122, 0.12);
+    color: var(--danger);
+}
+.budget-performance-progress {
+    width: 100%;
+    height: 9px;
+    background: #eee9df;
+    border-radius: 999px;
+    overflow: hidden;
+}
+.budget-performance-progress-bar {
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    transition: width 0.45s ease;
+}
+.budget-performance-progress-bar.success {
+    background: var(--green);
+}
+.budget-performance-progress-bar.warning {
+    background: var(--warning);
+}
+.budget-performance-progress-bar.danger {
+    background: var(--danger);
+}
+@media (max-width: 575.98px) {
+    .budget-performance-card {
+        padding: 15px;
+    }
+    .budget-performance-status {
+        font-size: 0.7rem;
+        padding: 4px 8px;
+    }
+    .report-pdf-button {
+        width: 100%;
+    }
+}
+</style>
 {% endblock %}

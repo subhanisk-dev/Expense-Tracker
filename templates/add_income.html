@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Add Income · SpendWise{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <a href="{{ url_for('income') }}" class="text-decoration-none text-muted small">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to income
+        </a>
+        <div class="form-card mt-3">
+            <div class="card-body p-4 p-md-5">
+                <h1 class="page-heading h2 mb-1">Add income</h1>
+                <p class="text-muted mb-4">Record salary, freelance work, bonuses or other earnings.</p>
+                <form method="POST" class="row g-3">
+                    <div class="col-12">
+                        <label for="title" class="form-label">Income source *</label>
+                        <input type="text" id="title" name="title" class="form-control" value="{{ request.form.get('title', '') }}" placeholder="e.g. Monthly Salary" maxlength="120" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="amount" class="form-label">Amount (₹) *</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" id="amount" name="amount" class="form-control" min="0.01" step="0.01" value="{{ request.form.get('amount', '') }}" placeholder="0.00" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="category_id" class="form-label">Category *</label>
+                        <select id="category_id" name="category_id" class="form-select" required>
+                            <option value="">Choose a category</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {% if request.form.get('category_id') == category.id|string %}selected{% endif %}>{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="income_date" class="form-label">Date *</label>
+                        <input type="date" id="income_date" name="income_date" class="form-control" value="{{ request.form.get('income_date', today) }}" required>
+                    </div>
+                    <div class="col-12">
+                        <label for="notes" class="form-label">Notes <span class="text-muted fw-normal">(optional)</span></label>
+                        <textarea id="notes" name="notes" class="form-control" rows="4" maxlength="500" placeholder="Any useful details?">{{ request.form.get('notes', '') }}</textarea>
+                    </div>
+                    <div class="col-12 d-flex flex-wrap gap-2 pt-2">
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="bi bi-check-lg me-1"></i>
+                            Save income
+                        </button>
+                        <a href="{{ url_for('income') }}" class="btn btn-light">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

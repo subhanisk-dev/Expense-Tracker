@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Categories · SpendWise{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+    <div>
+        <p class="section-label mb-1">ORGANIZATION</p>
+        <h1 class="page-heading mb-1">
+            <i class="bi bi-tags me-2"></i>
+            Categories
+        </h1>
+        <p class="text-muted mb-0">Organize your expenses with system and custom categories.</p>
+    </div>
+    <a href="{{ url_for('add_category') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>
+        Add category
+    </a>
+</div>
+<div class="card mb-4">
+    <div class="card-header p-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="fw-bold mb-1">System categories</h5>
+                <p class="text-muted mb-0 small">Default categories available to every user.</p>
+            </div>
+            <span class="badge-soft">{{ system_categories|length }} categories</span>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        {% if system_categories %}
+        <div class="row g-3">
+            {% for category in system_categories %}
+            <div class="col-md-6 col-lg-4">
+                <div class="category-card">
+                    <div class="category-card-left">
+                        <span class="category-dot" data-color="{{ category.color }}"></span>
+                        <div>
+                            <div class="fw-semibold">{{ category.name }}</div>
+                            <small class="text-muted">System category</small>
+                        </div>
+                    </div>
+                    <i class="bi bi-lock-fill text-muted"></i>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-inline">
+            <i class="bi bi-info-circle"></i>
+            <span>No system categories found.</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<div class="card">
+    <div class="card-header p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h5 class="fw-bold mb-1">My custom categories</h5>
+                <p class="text-muted mb-0 small">Categories created specifically for your account.</p>
+            </div>
+            <span class="badge-soft soft-violet">{{ custom_categories|length }} categories</span>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        {% if custom_categories %}
+        <div class="row g-3">
+            {% for category in custom_categories %}
+            <div class="col-md-6 col-lg-4">
+                <div class="category-card">
+                    <div class="category-card-left">
+                        <span class="category-dot" data-color="{{ category.color }}"></span>
+                        <div>
+                            <div class="fw-semibold">{{ category.name }}</div>
+                            <small class="text-muted">Custom category</small>
+                        </div>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-sm action-menu-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('edit_category', category_id=category.id) }}">
+                                    <i class="bi bi-pencil me-2"></i>
+                                    Edit
+                                </a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <form method="POST" action="{{ url_for('delete_category', category_id=category.id) }}" onsubmit="return confirm('Delete this category? This cannot be undone.');">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="bi bi-trash me-2"></i>
+                                        Delete
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="mb-3">
+                <i class="bi bi-tags" style="font-size: 2.5rem; color: var(--brand);"></i>
+            </div>
+            <h5 class="fw-bold">No custom categories yet</h5>
+            <p class="text-muted mb-3">Create your own category to organize expenses your way.</p>
+            <a href="{{ url_for('add_category') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i>
+                Create category
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

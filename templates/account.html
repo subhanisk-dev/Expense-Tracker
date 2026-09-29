@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}My Account · SpendWise{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+    <div>
+        <p class="section-label mb-1">ACCOUNT</p>
+        <h1 class="page-heading mb-1">My account</h1>
+        <p class="text-muted mb-0">Manage your profile, password and account settings.</p>
+    </div>
+</div>
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card h-100">
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="account-avatar">{{ user.full_name[0]|upper }}</div>
+                    <div>
+                        <h4 class="fw-bold mb-1">{{ user.full_name }}</h4>
+                        <p class="text-muted mb-0">{{ user.email }}</p>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-3">Profile information</h5>
+                <form method="POST">
+                    <input type="hidden" name="action" value="update_profile">
+                    <div class="mb-3">
+                        <label for="full_name" class="form-label fw-semibold">Full name</label>
+                        <input type="text" id="full_name" name="full_name" class="form-control" value="{{ user.full_name }}" maxlength="100" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="email" class="form-label fw-semibold">Email</label>
+                        <input type="email" id="email" name="email" class="form-control" value="{{ user.email }}" maxlength="150" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>
+                        Save profile
+                    </button>
+                </form>
+                <hr class="my-4">
+                <h5 class="fw-bold mb-3">Account details</h5>
+                <div class="account-info-row">
+                    <span>Account ID</span>
+                    <strong>#{{ user.id }}</strong>
+                </div>
+                <div class="account-info-row">
+                    <span>Member since</span>
+                    <strong>{{ user.created_at.strftime('%d %b %Y') if user.created_at else '—' }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-1">Change password</h5>
+                <p class="text-muted small mb-4">Use a password of at least 6 characters.</p>
+                <form method="POST">
+                    <input type="hidden" name="action" value="change_password">
+                    <div class="mb-3">
+                        <label for="current_password" class="form-label fw-semibold">Current password</label>
+                        <input type="password" id="current_password" name="current_password" class="form-control" autocomplete="current-password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="new_password" class="form-label fw-semibold">New password</label>
+                        <input type="password" id="new_password" name="new_password" class="form-control" minlength="6" autocomplete="new-password" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="confirm_password" class="form-label fw-semibold">Confirm new password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-control" minlength="6" autocomplete="new-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="bi bi-shield-lock me-1"></i>
+                        Change password
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="card border-danger">
+            <div class="card-body p-4">
+                <h5 class="fw-bold text-danger mb-1">Delete account</h5>
+                <p class="text-muted small">This permanently removes your account and all expenses, income and budgets associated with it.</p>
+                <form method="POST" action="{{ url_for('delete_account') }}" onsubmit="return confirm('Delete your account permanently? This cannot be undone.');">
+                    <div class="mb-3">
+                        <label for="delete_password" class="form-label fw-semibold">Confirm password</label>
+                        <input type="password" id="delete_password" name="password" class="form-control" autocomplete="current-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="bi bi-trash3 me-1"></i>
+                        Delete my account
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -14,43 +14,32 @@
                 <form method="post" class="row g-3">
                     <div class="col-12">
                         <label class="form-label fw-semibold">What did you spend on? *</label>
-                        <input name="title" class="form-control" placeholder="e.g. Groceries at Fresh Mart"
-                            value="{{ request.form.get('title','') }}" required maxlength="120">
+                        <input name="title" class="form-control" placeholder="e.g. Groceries at Fresh Mart" value="{{ request.form.get('title','') }}" required maxlength="120">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Amount (₹) *</label>
-                        <input name="amount" type="number" min="0.01" step="0.01" class="form-control"
-                            placeholder="0.00" value="{{ request.form.get('amount','') }}" required>
+                        <input name="amount" type="number" min="0.01" step="0.01" class="form-control" placeholder="0.00" value="{{ request.form.get('amount','') }}" required>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">Category *</label><select name="category_id"
-                            class="form-select" required>
+                        <label class="form-label fw-semibold">Category *</label>
+                        <select name="category_id" class="form-select" required>
                             <option value="">Choose a category</option>
                             {% for c in categories %}
-                            <option value="{{ c.id }}" {% if request.form.get('category_id')==c.id|string %} selected {%
-                                endif%}>
-                                {{ c.name }}</option>
+                            <option value="{{ c.id }}" {% if request.form.get('category_id') == c.id|string %}selected{% endif %}>{{ c.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Date *</label>
-                        <input name="expense_date" type="date" class="form-control"
-                            value="{{ request.form.get('expense_date', today) }}" required>
+                        <input name="expense_date" type="date" class="form-control" value="{{ request.form.get('expense_date', today) }}" required>
                     </div>
-                    <div class="col-12"><label class="form-label fw-semibold">
-                            Notes <span class="text-muted fw-normal">(optional)</span>
-                        </label><textarea name="notes" class="form-control" rows="3" placeholder="Any useful details?">
-                            {{ request.form.get('notes','') }}
-                        </textarea>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Notes <span class="text-muted fw-normal">(optional)</span></label>
+                        <textarea name="notes" class="form-control" rows="3" maxlength="500" placeholder="Any useful details?">{{ request.form.get('notes','') }}</textarea>
                     </div>
                     <div class="col-12 d-flex gap-2 pt-2">
-                        <button class="btn btn-primary px-4" type="submit">
-                            Save expense
-                        </button>
-                        <a class="btn btn-light" href="{{ url_for('dashboard') }}">
-                            Cancel
-                        </a>
+                        <button class="btn btn-primary px-4" type="submit">Save expense</button>
+                        <a class="btn btn-light" href="{{ url_for('dashboard') }}">Cancel</a>
                     </div>
                 </form>
             </div>

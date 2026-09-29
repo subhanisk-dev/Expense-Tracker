@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Create Account · SpendWise{% endblock %}
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-brand">
+            <div class="auth-icon">
+                <i class="bi bi-person-plus-fill"></i>
+            </div>
+            <h1>Create your account</h1>
+            <p>Start tracking your income, expenses and budgets.</p>
+        </div>
+        <form method="POST" novalidate>
+            <div class="mb-3">
+                <label for="full_name" class="form-label fw-semibold">Full name</label>
+                <input
+                    type="text"
+                    id="full_name"
+                    name="full_name"
+                    class="form-control"
+                    value="{{ request.form.get('full_name', '') }}"
+                    placeholder="Your full name"
+                    maxlength="100"
+                    autocomplete="name"
+                    required
+                >
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label fw-semibold">Email</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    class="form-control"
+                    value="{{ request.form.get('email', '') }}"
+                    placeholder="you@example.com"
+                    maxlength="150"
+                    autocomplete="email"
+                    required
+                >
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label fw-semibold">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-control"
+                    placeholder="At least 6 characters"
+                    minlength="6"
+                    autocomplete="new-password"
+                    required
+                >
+            </div>
+            <div class="mb-4">
+                <label for="confirm_password" class="form-label fw-semibold">Confirm password</label>
+                <input
+                    type="password"
+                    id="confirm_password"
+                    name="confirm_password"
+                    class="form-control"
+                    placeholder="Enter your password again"
+                    minlength="6"
+                    autocomplete="new-password"
+                    required
+                >
+            </div>
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-person-plus me-1"></i>
+                Create account
+            </button>
+        </form>
+        <div class="auth-divider">
+            <span>Already have an account?</span>
+        </div>
+        <div class="text-center">
+            <a href="{{ url_for('login') }}" class="fw-semibold">Sign in</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

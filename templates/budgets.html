@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+{% block title %}Budgets · SpendWise{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+    <div>
+        <p class="section-label mb-1">PLANNING</p>
+        <h1 class="page-heading mb-1">
+            <i class="bi bi-wallet2 me-2"></i>
+            Budgets
+        </h1>
+        <p class="text-muted mb-0">
+            Set monthly limits and keep your spending on track.
+        </p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <form method="GET" class="d-flex gap-2">
+            <input type="month" name="month" class="form-control" value="{{ budget_month[:7] }}" aria-label="Budget month">
+            <button type="submit" class="btn btn-light">
+                <i class="bi bi-calendar3 me-1"></i>
+                View
+            </button>
+        </form>
+        <a href="{{ url_for('add_budget') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>
+            Add Budget
+        </a>
+    </div>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-md-6 col-xl-3">
+        <div class="card budget-card h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon stat-icon-brand">
+                    <i class="bi bi-wallet2"></i>
+                </div>
+                <div>
+                    <small class="text-muted d-block">Monthly budget</small>
+                    <div class="stat-value">
+                        {{ total_budget|inr }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card budget-card h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon stat-icon-danger">
+                    <i class="bi bi-arrow-up-right"></i>
+                </div>
+                <div>
+                    <small class="text-muted d-block">Spent</small>
+                    <div class="stat-value">
+                        {{ total_spent|inr }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card budget-card h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon stat-icon-success">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div>
+                    <small class="text-muted d-block">
+                        {% if remaining >= 0 %}Remaining{% else %}Overspent{% endif %}
+                    </small>
+                    <div class="stat-value {% if remaining >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {{ remaining|abs|inr }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card budget-card h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon stat-icon-teal">
+                    <i class="bi bi-speedometer2"></i>
+                </div>
+                <div>
+                    <small class="text-muted d-block">Used</small>
+                    <div class="stat-value">
+                        {{ percentage_used|round(1) }}%
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card budget-card mb-4">
+    <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+            <div>
+                <h5 class="fw-bold mb-1">
+                    Monthly budget progress
+                </h5>
+                <p class="text-muted small mb-0">
+                    {{ budget_month }}
+                </p>
+            </div>
+            {% if total_budget <= 0 %}
+            <span class="budget-status budget-status-warning">
+                <i class="bi bi-exclamation-triangle"></i>
+                No monthly budget
+            </span>
+            {% elif percentage_used > 100 %}
+            <span class="budget-status budget-status-danger">
+                <i class="bi bi-exclamation-circle"></i>
+                Over budget
+            </span>
+            {% elif percentage_used >= 80 %}
+            <span class="budget-status budget-status-warning">
+                <i class="bi bi-exclamation-triangle"></i>
+                Near limit
+            </span>
+            {% else %}
+            <span class="budget-status budget-status-success">
+                <i class="bi bi-check-circle"></i>
+                On track
+            </span>
+            {% endif %}
+        </div>
+        <div class="budget-progress">
+            <div class="budget-progress-bar
+                {% if percentage_used > 100 %}
+                    budget-progress-danger
+                {% elif percentage_used >= 80 %}
+                    budget-progress-warning
+                {% else %}
+                    budget-progress-success
+                {% endif %}"
+                data-width="{{ progress_percentage|round(2) }}"></div>
+        </div>
+        <div class="d-flex justify-content-between mt-2 small text-muted">
+            <span>{{ total_spent|inr }} spent</span>
+            <span>{{ percentage_used|round(1) }}%</span>
+        </div>
+    </div>
+</div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="fw-bold mb-1">Category budgets</h4>
+        <p class="text-muted mb-0">
+            Track individual spending limits by category.
+        </p>
+    </div>
+</div>
+{% if category_budget_data %}
+<div class="row g-3">
+    {% for budget in category_budget_data %}
+    <div class="col-md-6 col-xl-4">
+        <div class="category-budget-card h-100 p-4">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="category-color-dot" data-color="{{ budget.color }}"></span>
+                    <div class="category-budget-title">
+                        {{ budget.category_name }}
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn action-menu-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('edit_budget', budget_id=budget.id) }}">
+                                <i class="bi bi-pencil me-2"></i>
+                                Edit
+                            </a>
+                        </li>
+                        <li>
+                            <form method="POST" action="{{ url_for('delete_budget', budget_id=budget.id) }}" onsubmit="return confirm('Delete this budget?');">
+                                <button class="dropdown-item text-danger" type="submit">
+                                    <i class="bi bi-trash3 me-2"></i>
+                                    Delete
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-4">
+                    <div class="budget-mini-label">Budget</div>
+                    <div class="budget-mini-value">
+                        {{ budget.amount|inr }}
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="budget-mini-label">Spent</div>
+                    <div class="budget-mini-value">
+                        {{ budget.spent|inr }}
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="budget-mini-label">
+                        {% if budget.remaining >= 0 %}Left{% else %}Over{% endif %}
+                    </div>
+                    <div class="budget-mini-value {% if budget.remaining < 0 %}text-danger{% else %}text-success{% endif %}">
+                        {{ budget.remaining|abs|inr }}
+                    </div>
+                </div>
+            </div>
+            <div class="budget-progress category-progress">
+                <div class="budget-progress-bar
+                    {% if budget.percentage > 100 %}
+                        budget-progress-danger
+                    {% elif budget.percentage >= 80 %}
+                        budget-progress-warning
+                    {% else %}
+                        budget-progress-success
+                    {% endif %}"
+                    data-width="{{ budget.progress|round(2) }}"></div>
+            </div>
+            <div class="d-flex justify-content-between mt-2 small text-muted">
+                <span>{{ budget.percentage|round(1) }}% used</span>
+                <span>{{ budget.amount|inr }}</span>
+            </div>
+            {% if budget.notes %}
+            <div class="budget-note mt-3">
+                <i class="bi bi-info-circle me-1"></i>
+                {{ budget.notes }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body">
+        <div class="empty-inline">
+            <i class="bi bi-wallet2"></i>
+            <span>No category budgets for this month.</span>
+            <a href="{{ url_for('add_budget') }}">Create one</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("[data-width]").forEach(function (bar) {
+        const value = Number(bar.dataset.width);
+        if (!Number.isFinite(value)) {
+            return;
+        }
+        bar.style.width = `${Math.min(Math.max(value, 0), 100)}%`;
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

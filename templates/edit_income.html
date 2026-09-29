@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Edit Income · SpendWise{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <a href="{{ url_for('income') }}" class="text-decoration-none text-muted small">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to income
+        </a>
+        <div class="form-card mt-3">
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+                    <div>
+                        <h1 class="page-heading h2 mb-1">Edit income</h1>
+                        <p class="text-muted mb-0">Update the income transaction details.</p>
+                    </div>
+                    <span class="badge-soft">#{{ income.id }}</span>
+                </div>
+                <form method="POST" class="row g-3">
+                    <div class="col-12">
+                        <label for="title" class="form-label">Income source *</label>
+                        <input type="text" id="title" name="title" class="form-control" value="{{ request.form.get('title', income.title) }}" maxlength="120" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="amount" class="form-label">Amount (₹) *</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" id="amount" name="amount" class="form-control" min="0.01" step="0.01" value="{{ request.form.get('amount', income.amount) }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="category_id" class="form-label">Category *</label>
+                        <select id="category_id" name="category_id" class="form-select" required>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {% if request.form.get('category_id', income.category_id|string) == category.id|string %}selected{% endif %}>{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="income_date" class="form-label">Date *</label>
+                        <input type="date" id="income_date" name="income_date" class="form-control" value="{{ request.form.get('income_date', income.income_date.isoformat()) }}" required>
+                    </div>
+                    <div class="col-12">
+                        <label for="notes" class="form-label">Notes <span class="text-muted fw-normal">(optional)</span></label>
+                        <textarea id="notes" name="notes" class="form-control" rows="4" maxlength="500">{{ request.form.get('notes', income.notes or '') }}</textarea>
+                    </div>
+                    <div class="col-12 d-flex flex-wrap gap-2 pt-2">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-check-lg me-1"></i>
+                            Save changes
+                        </button>
+                        <a href="{{ url_for('income') }}" class="btn btn-light">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Edit Category · SpendWise{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-xl-6">
+        <a href="{{ url_for('categories') }}" class="text-decoration-none text-muted small">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to categories
+        </a>
+        <div class="card form-card mt-3">
+            <div class="card-body p-4 p-md-5">
+                <div class="mb-4">
+                    <p class="section-label mb-1">CATEGORY SETTINGS</p>
+                    <h1 class="page-heading h2 mb-1">Edit category</h1>
+                    <p class="text-muted mb-0">Update your custom category.</p>
+                </div>
+                <form method="POST" novalidate>
+                    <div class="mb-4">
+                        <label for="name" class="form-label">
+                            Category name
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="name" name="name" class="form-control" maxlength="50" value="{{ request.form.get('name', category.name) }}" required autofocus>
+                        <div class="form-text">Maximum 50 characters.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="color" class="form-label">Category color</label>
+                        <div class="d-flex align-items-center gap-3">
+                            <input type="color" id="color" name="color" class="form-control form-control-color" value="{{ request.form.get('color', category.color) }}" title="Choose category color">
+                            <div>
+                                <div class="fw-semibold">Choose a color</div>
+                                <small class="text-muted">This color will appear throughout SpendWise.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="category-preview mb-4">
+                        <small class="text-muted d-block mb-2">PREVIEW</small>
+                        <div class="category-card">
+                            <div class="category-card-left">
+                                <span class="category-dot" id="categoryPreviewDot"></span>
+                                <div>
+                                    <div class="fw-semibold" id="categoryPreviewName">{{ category.name }}</div>
+                                    <small class="text-muted">Custom category</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 pt-2">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-check-lg me-1"></i>
+                            Save changes
+                        </button>
+                        <a href="{{ url_for('categories') }}" class="btn btn-light">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const nameInput = document.getElementById("name");
+    const colorInput = document.getElementById("color");
+    const previewName = document.getElementById("categoryPreviewName");
+    const previewDot = document.getElementById("categoryPreviewDot");
+    function updatePreview() {
+        const name = nameInput.value.trim();
+        previewName.textContent = name || "Your category";
+        previewDot.style.backgroundColor = colorInput.value;
+    }
+    nameInput.addEventListener("input", updatePreview);
+    colorInput.addEventListener("input", updatePreview);
+    updatePreview();
+});
+</script>
+{% endblock %}
